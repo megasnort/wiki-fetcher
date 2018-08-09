@@ -24,10 +24,7 @@ def parse_line(term, language, cleanup):
         if brace_pos != -1:
             term = term[0:brace_pos]
 
-    term = term.strip()
-
-    if term:
-        return fetch_wiki_entry_for(term, language)
+    return term.strip()
 
 try:
     language = sys.argv[1]
@@ -41,15 +38,18 @@ try:
 
     with open(output_file_path, 'w') as output_file:
         for term in lines:
-            value = parse_line(term, language, cleanup)
+            cleaned_term = parse_line(term, language, cleanup)
 
-            if value is None:
-                value = parse_line(term, 'en', cleanup)
+            if cleaned_term:
+                entry = fetch_wiki_entry_for(cleaned_term, language)
 
-            if value is None:
-                value = 'Nothing found!'
+                if entry is None:
+                    entry = fetch_wiki_entry_for(cleaned_term, 'en')
 
-            output_file.write(term + '\n\n' + value + '\n\n==========================\n\n')
+                if entry is None:
+                    entry = 'Nothing found!'
+
+                output_file.write(term + '\n\n' + entry + '\n\n==========================\n\n')
 
         print('Output file written: ' + output_file_path)
 
